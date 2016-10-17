@@ -1,0 +1,90 @@
+include $(shell ocamlc -where)/Makefile.config
+PKGNAME=logger
+MKDIR ?= mkdir -vp
+CP    ?= cp
+
+TESTS_ENVIRONMENT=EXEEXT=native ./test.sh
+
+.SUFFIXES: .cmo .ml
+.PHONY: all syntax bundle sample
+.PHONY: celan clean clean_tests install uninstall
+.PHONY: tests test regression promote
+
+.DEFAULT_GOAL := syntax
+
+syntax: camlp5/pa_log.ml
+	ocamlfind c -c -syntax camlp5o -package camlp5 $^ -o camlp5/pa_log.cmo
+
+celan: clean
+
+clean: clean_tests
+	$(RM) -r _build camlp5/*.cm[iox] *.native
+
+######################## Tests related stuff  ##########################
+REGRES_CASES := $(shell seq -s \  -w 1 004) $(shell seq -s \  -w 005 007)
+PPOPS := ""
+test004-log.native: PPOPTS+=-VIEW test002 -VIEW test003
+test005-log.native: PPOPTS+=-LOG -VIEW test002 -VIEW test003
+test001-log.native: PPOPTS+=-LOG
+test006-log.native: PPOPTS+=-LOG
+test007-log.native: PPOPTS+=-LOG
+test002-log.native: PPOPTS+=-VIEW test002
+test003-log.native: PPOPTS+=-VIEW test003
+
+T=camlp5/regression/test
+define TESTRULES
+
+.PHONY: test$(1)-log.native test$(1)-nolog.native
+.PHONY: compile_tests_native compile_tests_byte
+
+test$(1)-nolog.native: syntax
+test$(1)-nolog.native: $(T)$(1).ml
+	ocamlfind opt -pp "camlp5o pr_o.cmo camlp5/pa_log.cmo $$(PPOPTS)" $$< -o $$@
+
+test$(1)-log.native: syntax
+test$(1)-log.native: $(T)$(1).ml
+	ocamlfind opt -pp "camlp5o pr_o.cmo camlp5/pa_log.cmo $$(PPOPTS)" $$< -o $$@
+
+compile_tests: test$(1)-log.native test$(1)-nolog.native
+run_tests: test_$(1)
+test_$(1):
+	@cd camlp5/regression  && $(TESTS_ENVIRONMENT) ../../test$(1); \
+	if [ $$$$? -ne 0 ] ; then echo "$(1) FAILED"; else echo "$(1) PASSED"; fi
+endef
+$(foreach i,$(REGRES_CASES),$(eval $(call TESTRULES,$(i)) ) )
+
+.PHONY: compile_tests_native compile_tests run_tests
+
+compile_tests:
+
+tests: all compile_tests run_tests
+test: tests
+
+######################## Installation related stuff ##########################
+INSTALL_TARGETS=META \
+	$(wildcard camlp5/pa_log.cmo) \
+
+BUNDLEDIR=_build/bundle/$(PKGNAME)
+
+define MAKE_BUNDLE_RULE
+$(BUNDLEDIR)/$(notdir $(1)): $(1)
+	cp $(1) $(BUNDLEDIR)
+MAKE_BUNDLE_TARGETS += $(BUNDLEDIR)/$(notdir $(1))
+
+endef
+$(foreach i,$(INSTALL_TARGETS),$(eval $(call MAKE_BUNDLE_RULE,$(i)) ) )
+
+rmbundledir:
+	@$(RM) -r $(BUNDLEDIR)
+
+$(BUNDLEDIR):
+	@$(MKDIR) $@
+
+bundle: rmbundledir $(BUNDLEDIR) $(MAKE_BUNDLE_TARGETS)
+
+install: bundle
+	ocamlfind install $(PKGNAME) $(BUNDLEDIR)/*
+
+uninstall:
+	ocamlfind remove $(PKGNAME)
+
