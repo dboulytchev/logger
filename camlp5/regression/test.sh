@@ -5,21 +5,22 @@ if test $# = 0; then
     exit 1
 fi
 
-TEST=`basename $1`
+TEST=$1
 ERROR=0
 
 # List of program to run
-RUN="${TEST}-log${EXEEXT} ${TEST}-nolog${EXEEXT}"
+RUN="${TEST}-log.${EXEEXT} ${TEST}-nolog.${EXEEXT}"
 # Program arguments. Could be empty.
 ARGS=""
 # Logs or other outputs to check
-CHECKS="${TEST}-log.log ${TEST}-nolog.log"
+BASE=`basename ${TEST}`
+CHECKS="${BASE}-log.log ${BASE}-nolog.log"
 
 # Check if all executables are present
 for i in ${RUN}; do
     if [ ! -x ${i} ]; then
-	echo "File ${i} does not exist or not executable"
-	ERROR=$((${ERROR} + 1))
+      echo "File ${i} does not exist or not executable"
+      ERROR=$((${ERROR} + 1))
     fi
 done
 
@@ -33,7 +34,7 @@ PATH=.:${PATH}
 
 for i in ${RUN}; do
     log=`basename ${i} ${EXEEXT}`
-    ${i} ${ARGS} > ${log}.log
+    ${i} ${ARGS} > ${log}log
 done
 
 # Restore search path
@@ -42,10 +43,10 @@ PATH=${OLDPATH}
 # Compare check outputs to saved samples
 for i in ${CHECKS}; do
     if ! diff -ubB orig/${i} ${i} > ${i}.diff; then
-	echo "${TEST}: FAILED (see ${i}.diff)"
-	ERROR=$((${ERROR} + 1))
+        echo "${TEST}: FAILED (see ${i}.diff)"
+        ERROR=$((${ERROR} + 1))
     else
-	rm -f ${i}.diff
+        rm -f ${i}.diff
     fi
 done
 

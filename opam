@@ -1,0 +1,20 @@
+opam-version: "1.2"
+
+name: "logger"
+authors: [ "https://github.com/dboulytchev" ]
+version: "0.4.2"
+maintainer: "kakadu.hafanana@gmail.com"
+homepage:    "https://github.com/dboulytchev/logger"
+bug-reports: "https://github.com/dboulytchev/logger/issues"
+dev-repo:    "https://github.com/dboulytchev/logger.git"
+
+build: [make "-f" "Makefile.ob"]
+build-test: [make "-f" "Makefile.ob" "test"]
+
+install: [make "-f" "Makefile.ob" "PREFIX=%{prefix}%" "install"]
+remove:  [make "-f" "Makefile.ob" "PREFIX=%{prefix}%" "uninstall"]
+
+depends: [
+  "ocamlfind"
+  "camlp5"
+]
