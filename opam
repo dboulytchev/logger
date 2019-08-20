@@ -23,7 +23,7 @@ build: [
   [make "-f" "Makefile.ob" "test"] {with-test}
 ]
 install: [make "-f" "Makefile.ob" "PREFIX=%{prefix}%" "install"]
-remove: [make "-f" "Makefile.ob" "PREFIX=%{prefix}%" "uninstall"]
+#remove: [make "-f" "Makefile.ob" "PREFIX=%{prefix}%" "uninstall"]
 
 dev-repo: "git+https://github.com/dboulytchev/logger.git"
 url {
