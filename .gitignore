@@ -3,7 +3,7 @@
 _build
 *.byte
 *.native
-
+*.cm[iox]
 
 
 

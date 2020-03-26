@@ -13,7 +13,8 @@ TESTS_ENVIRONMENT=EXEEXT=native ./test.sh
 .DEFAULT_GOAL := syntax
 
 syntax: camlp5/pa_log.ml
-	ocamlfind c -c -syntax camlp5o -package camlp5 $^ -o camlp5/pa_log.cmo
+	ocamlfind c   -c -syntax camlp5o -package camlp5 $^ -o camlp5/pa_log.cmo
+	ocamlfind opt -c -syntax camlp5o -package camlp5 $^ -o camlp5/pa_log.cmx
 
 celan: clean
 
@@ -62,7 +63,9 @@ test: tests
 
 ######################## Installation related stuff ##########################
 INSTALL_TARGETS=META \
-	$(wildcard camlp5/pa_log.cmo) \
+	camlp5/pa_log.cmo \
+	camlp5/pa_log.o \
+	camlp5/pa_log.cmx \
 
 BUNDLEDIR=_build/bundle/$(PKGNAME)
 
