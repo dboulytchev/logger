@@ -3,7 +3,7 @@ description = "Logger as a Camlp5 syntax extension"
 
 package "syntax" (
  description = "Syntax extension for Logger"
- requires = "camlp5"
+ requires = "camlp5 camlp5.pr_o"
 
  archive(syntax,preprocessor) = "pa_log.cmo"
  archive(syntax,toploop)      = "pa_log.cmo"
